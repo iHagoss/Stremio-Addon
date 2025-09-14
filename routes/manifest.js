@@ -9,8 +9,8 @@ router.get("/", (req, res) => {
     description:
       "Provides streams with forced English subtitles and chapters metadata for series intros and credits.",
     resources: ["stream", "meta"],
-    types: ["series"],
-    idPrefixes: ["series"]
+    types: ["series", "episode"],
+    idPrefixes: ["series", "episode"]
   };
   res.type("application/json").json(manifest);
 });
