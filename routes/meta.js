@@ -1,8 +1,6 @@
 const express = require("express");
 const router = express.Router();
 
-// Example metadata for series with forced English subtitles and chapters
-// In real use, this data might come from a database or external API.
 router.get("/:type/:id", (req, res) => {
   const { type, id } = req.params;
 
@@ -10,7 +8,7 @@ router.get("/:type/:id", (req, res) => {
     return res.status(404).json({ error: "Only 'series' type is supported" });
   }
 
-  // Example metadata response
+  // Example metadata with chapters
   const meta = {
     id: id,
     type: "series",
@@ -26,16 +24,16 @@ router.get("/:type/:id", (req, res) => {
         type: "intro",
         start: 0,
         end: 120,
-        name: "Intro",
+        name: "Intro"
       },
       {
         id: "credits",
         type: "credits",
         start: 3300,
         end: 3600,
-        name: "Credits",
-      },
-    ],
+        name: "Credits"
+      }
+    ]
   };
 
   res.json(meta);
