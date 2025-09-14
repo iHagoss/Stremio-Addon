@@ -1,39 +1,38 @@
-const express = require("express");
-const dotenv = require("dotenv");
-const manifestRouter = require("./routes/manifest");
-const metaRouter = require("./routes/meta");
-const streamRouter = require("./routes/stream");
+const { addonBuilder } = require("stremio-addon-sdk");
+const fetch = require("node-fetch");
 
-dotenv.config();
+const manifest = {
+  id: "community.skipper",
+  version: "1.0.0",
+  name: "Skipper",
+  description: "Skip intros and recaps automatically",
+  types: ["movie", "series"],
+  resources: ["stream"],
+  idPrefixes: ["tt"]
+};
 
-const app = express();
+const builder = new addonBuilder(manifest);
 
-// Serve manifest at /manifest.json
-app.use("/manifest.json", manifestRouter);
+builder.defineStreamHandler(async ({ type, id }) => {
+  const skipDataUrl = `https://yourdomain.com/skip-data/${id}.json`;
 
-// Meta route for series metadata
-app.use("/meta", metaRouter);
+  let skipData = {};
+  try {
+    const res = await fetch(skipDataUrl);
+    skipData = await res.json();
+  } catch (e) {
+    console.warn("No skip data found for", id);
+  }
 
-// Streams route for episode streams
-app.use("/stream", streamRouter);
+  const stream = {
+    title: "1080p - Skippable",
+    url: "https://yourstreamsource.com/stream.mkv",
+    behaviorHints: {
+      skip: skipData // Inject skip metadata here
+    }
+  };
 
-// Redirect root to manifest.json
-app.get("/", (req, res) => {
-  res.redirect("/manifest.json");
+  return Promise.resolve({ streams: [stream] });
 });
 
-// 404 handler
-app.use((req, res, next) => {
-  res.status(404).json({ error: "Not Found" });
-});
-
-// Generic error handler
-app.use((err, req, res, next) => {
-  console.error(err);
-  res.status(500).json({ error: "Internal Server Error" });
-});
-
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`Stremio addon listening on port ${port}`);
-});
+module.exports = builder.getInterface();
