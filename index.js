@@ -8,10 +8,13 @@ dotenv.config();
 
 const app = express();
 
-// Serve manifest at /manifest.json (Stremio expects this exact path)
+// Serve manifest at /manifest.json
 app.use("/manifest.json", manifestRouter);
 
+// Meta route for series metadata
 app.use("/meta", metaRouter);
+
+// Streams route for episode streams
 app.use("/stream", streamRouter);
 
 // Redirect root to manifest.json
@@ -28,14 +31,6 @@ app.use((req, res, next) => {
 app.use((err, req, res, next) => {
   console.error(err);
   res.status(500).json({ error: "Internal Server Error" });
-});
-
-// Catch uncaught exceptions and unhandled rejections to prevent crashes
-process.on("uncaughtException", (err) => {
-  console.error("Uncaught Exception:", err);
-});
-process.on("unhandledRejection", (reason, promise) => {
-  console.error("Unhandled Rejection at:", promise, "reason:", reason);
 });
 
 const port = process.env.PORT || 3000;
